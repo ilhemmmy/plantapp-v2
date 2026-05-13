@@ -10,20 +10,18 @@ try {
   // package not available — will use in-memory fallback
 }
 
+const isWeb = typeof window !== 'undefined' && typeof localStorage !== 'undefined';
 const memoryStore = new Map();
 
 export async function getItem(key) {
   if (AsyncStorage) {
     try {
-      const value = await AsyncStorage.getItem(key);
-      return value;
+      return await AsyncStorage.getItem(key);
     } catch (error) {
-      console.log('Storage getItem error', error);
       return null;
     }
   }
-
-  // fallback
+  if (isWeb) return localStorage.getItem(key);
   return memoryStore.has(key) ? memoryStore.get(key) : null;
 }
 
@@ -33,11 +31,10 @@ export async function setItem(key, value) {
       await AsyncStorage.setItem(key, value);
       return true;
     } catch (error) {
-      console.log('Storage setItem error', error);
       return false;
     }
   }
-
+  if (isWeb) { localStorage.setItem(key, value); return true; }
   memoryStore.set(key, value);
   return true;
 }
@@ -48,10 +45,9 @@ export async function removeItem(key) {
       await AsyncStorage.removeItem(key);
       return true;
     } catch (error) {
-      console.log('Storage removeItem error', error);
       return false;
     }
   }
-
+  if (isWeb) { localStorage.removeItem(key); return true; }
   return memoryStore.delete(key);
 }

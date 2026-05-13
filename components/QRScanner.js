@@ -8,8 +8,12 @@ import {
   Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { CameraView } from 'expo-camera';
 import { theme } from '../theme';
+
+let CameraView = null;
+if (Platform.OS !== 'web') {
+  CameraView = require('expo-camera').CameraView;
+}
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 const VIEWFINDER_SIZE = SCREEN_WIDTH * 0.68;
@@ -62,6 +66,19 @@ function CornerBracket({ position }) {
 }
 
 export default function QRScanner({ onScanned, onCancel, scanned }) {
+  if (Platform.OS === 'web') {
+    return (
+      <View style={[styles.container, { alignItems: 'center', justifyContent: 'center' }]}>
+        <Text style={{ color: '#fff', fontSize: 18, marginBottom: 24, textAlign: 'center' }}>
+          Scanner QR non disponible sur navigateur web.
+        </Text>
+        <TouchableOpacity style={styles.cancelButton} onPress={onCancel}>
+          <Text style={styles.cancelText}>Retour</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
   // Calculate overlay region dimensions
   const viewfinderTop = (SCREEN_HEIGHT - VIEWFINDER_SIZE) / 2 - 40;
   const viewfinderLeft = (SCREEN_WIDTH - VIEWFINDER_SIZE) / 2;
